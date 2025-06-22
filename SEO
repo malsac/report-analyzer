@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO KPI Dashboard - Estenove</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;900&family=Helvetica+Neue:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #032f6e;
+            --secondary-color: #9dcde3;
+            --accent-blue: #6bb6ff;
+            --accent-light: #a8d1ff;
+            --accent-medium: #7db3dc;
+            --bg-color: #f8fafb;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --white: #ffffff;
+            --border-light: #e9ecef;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-color) 0%, #ffffff 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .main-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1e4a72 100%);
+            color: #fff;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(3, 47, 110, .3);
+        }
+
+        .main-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 900;
+            font-size: 2.5rem;
+            margin-bottom: .5rem;
+            letter-spacing: -.02em;
+        }
+
+        .main-header p {
+            font-family: 'Helvetica Neue', sans-serif;
+            font-weight: 400;
+            font-size: 1.1rem;
+            opacity: .9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--white) 0%, var(--bg-color) 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .05);
+        }
+
+        .stat-number {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 900;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: .5rem;
+        }
+
+        .stat-label {
+            font-family: 'Helvetica Neue', sans-serif;
+            font-weight: 400;
+            font-size: .9rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .category-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: var(--white);
+            border: 2px solid var(--secondary-color);
+            color: var(--primary-color);
+            padding: .8rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: .9rem;
+            transition: all .3s ease;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            background: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(3, 47, 110, .3);
+            transform: translateY(-2px);
+        }
+
+        .category-section {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .1);
+            border: 1px solid var(--border-light);
+        }
+
+        .category-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 900;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .category-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-blue));
+            border-radius: 2px;
+        }
+
+        .country-tabs {
+            display: flex;
+            justify-content: center;
+            gap: .5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .country-tab {
+            background: var(--bg-color);
+            border: none;
+            color: var(--text-dark);
+            padding: .6rem 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Helvetica Neue', sans-serif;
+            font-weight: 500;
+            font-size: .85rem;
+            transition: all .3s ease;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        .country-tab:hover,
+        .country-tab.active {
+            background: var(--secondary-color);
+            color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .chart-container {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .05);
+            border: 1px solid var(--border-light);
+            position: relative;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        .chart-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .data-table {
+            overflow-x: auto;
+            margin-top: 20px;
+            background: var(--bg-color);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 800px;
+        }
+
+        .data-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 5px;
+            font-weight: 500;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            font-size: 11px;
+        }
+
+        .data-table td {
+            padding: 8px 5px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-light);
+            font-family: 'Helvetica Neue', sans-serif;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(157, 205, 227, 0.1);
+        }
+
+        .data-table .metric-name {
+            text-align: left;
+            font-weight: 500;
+            color: var(--primary-color);
+            padding-left: 10px;
+        }
+
+        .data-table .no-data {
+            color: #ccc;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .legend-info {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 11px;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .main-header h1 {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .chart-wrapper {
+                height: 300px;
+            }
+
+            .category-nav {
+                gap: .5rem;
+            }
+
+            .nav-btn {
+                padding: .6rem 1rem;
+                font-size: .8rem;
+            }
+
+            .data-table {
+                padding: 0.5rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                font-size: 10px;
+                padding: 5px 3px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-header">
+        <h1>SEO Performance Dashboard</h1>
+        <p>Üst Yönetim Raporu - Estenove Digital Marketing KPIs</p>
+    </div>
+
+    <div class="container">
+        <!-- İstatistik Kartları -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalKPIs">185</div>
+                <div class="stat-label">Toplam SEO + Traffic KPI</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeCountries">8</div>
+                <div class="stat-label">Aktif Ülke + Bölge</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="trackingPeriod">16</div>
+                <div class="stat-label">Ay Takip</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="lastUpdate">Nisan 2025</div>
+                <div class="stat-label">Son Güncelleme</div>
+            </div>
+        </div>
+
+        <!-- Kategori Navigasyonu -->
+        <div class="category-nav">
+            <button class="nav-btn active" onclick="showCategory('average-position',event)">Average Position</button>
+            <button class="nav-btn" onclick="showCategory('visibility',event)">Visibility</button>
+            <button class="nav-btn" onclick="showCategory('keywords',event)">Keywords</button>
+            <button class="nav-btn" onclick="showCategory('backlinks',event)">Backlinks</button>
+            <button class="nav-btn" onclick="showCategory('traffic',event)">Traffic & Impression</button>
+            <button class="nav-btn" onclick="showCategory('search-term',event)">Search Term</button>
+        </div>
+
+        <!-- Average Position -->
+        <div id="average-position" class="category-section">
+            <h2 class="category-title">Average Position Analysis</h2>
+            <div class="country-tabs"></div>
+            <div class="chart-container">
+                <div class="chart-title">All Position Metrics - Combined View</div>
+                <div class="chart-wrapper">
+                    <canvas id="positionChart"></canvas>
+                </div>
+                <div class="data-table" id="positionTable"></div>
+                <div class="legend-info">* Boş hücreler veri olmayan ayları gösterir</div>
+            </div>
+        </div>
+
+        <!-- Visibility -->
+        <div id="visibility" class="category-section hidden">
+            <h2 class="category-title">Visibility Performance</h2>
+            <div class="country-tabs"></div>
+            <div class="chart-container">
+                <div class="chart-title">SEO Visibility Trends by Target Lists</div>
+                <div class="chart-wrapper">
+                    <canvas id="visibilityChart"></canvas>
+                </div>
+                <div class="data-table" id="visibilityTable"></div>
+                <div class="legend-info">* Boş hücreler veri olmayan ayları gösterir</div>
+            </div>
+        </div>
+
+        <!-- Keywords -->
+        <div id="keywords" class="category-section hidden">
+            <h2 class="category-title">Keyword Performance</h2>
+            <div class="country-tabs"></div>
+            <div class="chart-container">
+                <div class="chart-title">Top Keywords Performance (Non-Brand)</div>
+                <div class="chart-wrapper">
+                    <canvas id="keywordsChart"></canvas>
+                </div>
+                <div class="data-table" id="keywordsTable"></div>
+                <div class="legend-info">* Boş hücreler veri olmayan ayları gösterir</div>
+            </div>
+        </div>
+
+        <!-- Backlinks -->
+        <div id="backlinks" class="category-section hidden">
+            <h2 class="category-title">Backlink Analysis</h2>
+            <div class="chart-container">
+                <div class="chart-title">Backlink Verileri Henüz Mevcut Değil</div>
+                <div class="loading">
+                    <p>Bu kategori için veriler Excel dosyasında bulunmamaktadır. Backlink metriklerini eklemek için Excel dosyanızı güncelleyiniz.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Traffic & Impression -->
+        <div id="traffic" class="category-section hidden">
+            <h2 class="category-title">Traffic & Impression Metrics</h2>
+            <div class="country-tabs"></div>
+            <div class="chart-container">
+                <div class="chart-title">Click Performance by Country</div>
+                <div class="chart-wrapper">
+                    <canvas id="clickChart"></canvas>
+                </div>
+                <div class="data-table" id="clickTable"></div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">Impression Performance by Country</div>
+                <div class="chart-wrapper">
+                    <canvas id="impressionChart"></canvas>
+                </div>
+                <div class="data-table" id="impressionTable"></div>
+            </div>
+        </div>
+
+        <!-- Search Term -->
+        <div id="search-term" class="category-section hidden">
+            <h2 class="category-title">Search Term Analysis</h2>
+            <div class="country-tabs"></div>
+            <div class="chart-container">
+                <div class="chart-title">Hair Transplant Turkey Search Performance</div>
+                <div class="chart-wrapper">
+                    <canvas id="searchTermChart"></canvas>
+                </div>
+                <div class="data-table" id="searchTermTable"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Global state */
+        let currentCategory = 'average-position';
+        let currentCountry = 'US';
+        const chartInstances = {};
+
+        /* SEO Data */
+        const realSeoData = {
+            'average-position': {
+                'US': {
+                    'core_target': [53, 42, 25, 35, 28, 29, 32, 27, 20, 22, 22, 26, 30, 20, 26, 24],
+                    'primary_target': [24.5, 19, 21],
+                    'hair_transplant': [91, 68, 42, 72, 34, 56, 50, 41, 23, 23, 26, null, null, 29, 30, null],
+                    'hair_transplant_cost': [48, 34, 25, 39, 28, 29, 28, 27, 14, 13, 10, 10, 10, 8, 8, 5]
+                },
+                'UK': {
+                    'core_target': [58, 43, 21, 21, 29, 28, 27, 22, 15, 17, 15, 18, 31, 22, 22, 23],
+                    'primary_target': [30, 18, 19],
+                    'hair_transplant': [86, 60, 30, 23, 55, 59, 44, 32, 18, 22, 16, 27, null, null, 21, null],
+                    'hair_transplant_cost': [39, 37, 23, 41, 30, 27, 32, 26, 22, 19, 12, 9, 12, 8, 9, 9]
+                },
+                'AUSTRALIA': {
+                    'core_target': [null, null, null, null, null, null, null, null, null, null, null, 64, 17, 12, 17, 48],
+                    'hair_transplant': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+                    'hair_transplant_cost': [null, null, null, null, null, null, null, null, null, null, null, 3, 3, 5, 3, 3]
+                },
+                'NEW_ZEALAND': {
+                    'core_target': [null, null, null, null, null, null, null, null, null, null, null, 32, 19, 15, 13, 28],
+                    'hair_transplant': [null, null, null, null, null, null, null, null, null, null, null, 45, 25, null, 24, null],
+                    'hair_transplant_cost': [null, null, null, null, null, null, null, null, null, null, null, 3, 2, 3, 2, 2]
+                },
+                'FRANCE': {
+                    'core_target': [null, null, null, null, null, null, null, null, null, null, null, 77, 72, 89, 89, 88],
+                    'hair_transplant': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+                    'hair_transplant_cost': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+                },
+                ‘Canada’: {
+                    'core_target': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+                    'hair_transplant': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+                    'hair_transplant_cost': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null] 
+                }
+            },
+            'visibility': {
+                'US': {
+                    'core_target': [0.0281, 0.0268, 0.0409, 0.0577, 0.0821, 0.0902, 0.0834, 0.0937, 0.1111, 0.1064, 0.0760, 0.1508, 0.1229, 0.1708, 0.0771, null],
+                    'primary_target': [0.12, 0.19, 0.15, null]
+                },
+                'UK': {
+                    'core_target': [0.0167, 0.0231, 0.0324, 0.0433, 0.0654, 0.0712, 0.0823, 0.0934, 0.1045, 0.1156, 0.1267, 0.1378, 0.1489, 0.1600, 0.1711, null],
+                    'primary_target': [0.12, 0.14, 0.20, null]
+                },
+                'AUSTRALIA': {
+                    'core_target': [null, null, null, null, null, null, null, null, null, null, null, 0.374, 0.12, 0.20, 0.17, 0.0595]
+                },
+                'NEW_ZEALAND': {
+                    'core_target': [null, null, null, null, null, null, null, null, null, null, null, 0.2089, 0.17, 0.14, 0.15, 0.0177]
+                },
+                'FRANCE': {
+                    'core_target': [null, null, null, null, null, null, null, null, null, null, null, 0.0115, 0.0121, 0.0324, 0.0362, 0.0386]
+                }
+            },
+            'keywords': {
+                'US': {
+                    'top_3': [4, 2, 4, 7, 6, 9, 7, 7, 11, 14, 12, 26, 19, 16, 30, 28],
+                    'top_10': [4, 4, 5, 12, 12, 15, 15, 19, 32, 34, 48, 59, 48, 58, 81, 68],
+                    'top_20': [10, 8, 25, 21, 17, 24, 23, 29, 66, 65, 62, 76, 62, 78, 93, 95]
+                },
+                'UK': {
+                    'top_3':  [13, 0, 3, 3, 3, 2, 6, 6, 7, 8, 11, 15, 17, 31, 16, 18],
+                    'top_10': [2, 3, 5, 7, 6, 9, 15, 14, 18, 26, 29, 32, 46, 53, 45, 46],
+                    'top_20': [3, 7, 16, 15, 8, 15, 22, 26, 36, 45, 52, 51, 80,102, 102, 96]
+                },
+                'AUSTRALIA': {
+                    'top_3': [null, null, null, null, null, null, null, null, null, null, null, 29, 14, 15, 28, 28],
+                    'top_10': [null, null, null, null, null, null, null, null, null, null, null, 46, 31, 41, 42, 55],
+                    'top_20': [null, null, null, null, null, null, null, null, null, null, null, 57, 49, 56, 52, 68]
+                },
+                'NEW_ZEALAND': {
+                    'top_3': [null, null, null, null, null, null, null, null, null, null, null, 29, 14, 15, 28, 28],
+                    'top_10': [null, null, null, null, null, null, null, null, null, null, null, 46, 31, 41, 42, 55],
+                    'top_20': [null, null, null, null, null, null, null, null, null, null, null, 57, 49, 56, 52, 68]
+                },
+                'FRANCE': {
+                    'top_3': [null, null, null, null, null, null, null, null, null, null, null, null, 0, 0, 0, null],
+                    'top_10': [null, null, null, null, null, null, null, null, null, null, null, null, 0, 0, 1, null],
+                    'top_20': [null, null, null, null, null, null, null, null, null, null, null, null, 3, 4, 5, null]
+                },
+                ‘CANADA: {
+                    'top_3': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+                    'top_10': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+                    'top_20': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+                }
+            },
+            'traffic': {
+                'GLOBAL': {
+                    'clicks': [8186, 8550, 8821, 9209, 9431, 9833, 10205, 10425, 10727, 11075, 11432, 11773, 11400, 9370, 8240, null],
+                    'generic brand clicks': [612, 640, 664, 702, 737, 766, 801, 826, 856, 890, 917, 956, 663, 922, 604, null],
+                    'generic clicks without brand': [4399, 4561, 4715, 4836, 4976, 5110, 5239, 5397, 5559, 5731, 5874, 6011, 5870, 4380, null, null],
+                    'impressions': [518132, 520952, 526941, 531531, 535409, 539418, 546252, 548878, 555156, 559017, 563278, 567735, null, 517039, 564000, null]
+                },
+                'US': {
+                    'clicks': [3014, 3245, 3488, 3661, 4003, 4155, 4443, 4752, 4941, 5142, 5383, 5715, 5438, 3904, 2970, null],
+                    'generic clicks without brand': [1343, 1568, 1756, 1869, 2063, 2267, 2405, 2549, 2711, 2886, 3086, 3262, 3092, 1777, 1372, null],
+                    'impressions': [188519, 191687, 194324, 197616, 202440, 205009, 209562, 213025, 215334, 218874, 222674, 226358, null, 187955, 222536, null]
+                },
+                'UK': {
+                    'clicks': [881, 907, 949, 1006, 1059, 1089, 1133, 1171, 1219, 1272, 1302, 1348, 1313, 966, 872, null],
+                    'generic clicks without brand': [408, 437, 455, 481, 512, 530, 555, 579, 609, 632, 647, 683, 653, 486, 411, null],
+                    'impressions': [54037, 54626, 54987, 55614, 56205, 56717, 57319, 57941, 58369, 58933, 59468, 59998, null, 59453, 53970, null]
+                },
+                'AUSTRALIA': {
+                    'clicks': [815, 832, 851, 866, 886, 902, 925, 947, 963, 980, 1000, 1019, 810, 1000, 925, null],
+                    'generic clicks without brand': [501, 513, 523, 535, 547, 560, 569, 583, 590, 607, 618, 629, 499, 595, 616, null],
+                    'impressions': [20530, 20648, 20837, 21089, 21245, 21481, 21658, 21863, 22115, 22311, 22440, 22664, null, 20483, 22466, null]
+                },
+                'NEW_ZEALAND': {
+                    'clicks': [244, 246, 248, 251, 253, 255, 257, 260, 262, 264, 266, 268, 266, 247, 244, null],,
+                    'generic clicks without brand': [156, 158, 161, 164, 165, 168, 170, 173, 175, 178, 180, 182, 180, 168, 156, null],,
+                    'impressions': [3005, 3039, 3060, 3098, 3130, 3152, 3186, 3222, 3257, 3276, 3319, 3339, null, 3004, 3313, null]
+                },
+                'FRANCE': {
+                    'clicks': [68, 70, 71, 73, 75, 76, 78, 79, 81, 83, 84, 86, 68, 79, 84, null],
+                    'generic clicks without brand': [25, 25, 26, 26, 26, 27, 27, 27, 27, 28, 28, 28, 25, 27, 28, null],
+                    'impressions': [4165, 4169, 4177, 4184, 4190, 4196, 4201, 4208, 4215, 4222, 4226, 4232, null, 4227, 4164, null]
+                },
+                'EUROPE': {
+                    'clicks': [1289, 1310, 1324, 1344, 1358, 1384, 1402, 1416, 1436, 1455, 1474, 1487, 1472, 1373, 1289, null],
+                    'generic clicks without brand': [455, 464, 473, 483, 493, 500, 509, 521, 531, 536, 547, 555, 547, 480, 456, null],
+                    'impressions': [67298, 68982, 71277, 73056, 75695, 77541, 80256, 82187, 83828, 86818, 88206, 91075, null, 88670, 66901, null]
+                },
+                ‘ORTHER COUNTRIES: {
+                    'clicks':  [920, 933, 945, 960, 970, 985, 997, 1012, 1025, 1038, 1056, 1069, 1054, 917, 977, null],
+                    'generic clicks without brand': [9, 46, 86, 135, 183, 221, 256, 291, 333, 376, 418, 459, 371, 423, 8, null],
+                    'impressions': [125128, 130859, 133986, 138557, 142166, 145136, 149868, 153139, 157853, 161785, 165809, 169166, null, 126091, 164959, null]
+                }
+            },
+            'search-term': {
+                'GLOBAL': {
+                    'hair_transplant_turkey': [242330, 213960, 211220, 201910, 208630, 216530, 222230, 207470, 228920, 329770, 238770, 259170, 260110, 248860, 262610, null]
+                },
+                'US': {
+                    'hair_transplant_turkey': [89750, 82020, 79960, 76720, 80170, 98670, 107870, 93250, 112950, 121990, 116760, 140830, 126730, 125450, 133220, null]
+                },
+                'UK': {
+                    'hair_transplant_turkey': [63960, 52850, 49670, 49060, 48870, 49360, 47570, 46690, 47200, 109480, 49070, 48180, 55200, 52080, 53610, null]
+                },
+                'AUSTRALIA': {
+                    'hair_transplant_turkey': [14010, 11640, 12720, 13280, 14470, 13070, 13030, 12400, 12010, 26930, 12610, 12730, 15590, 13420, 18110, null]
+                },
+                'FRANCE': {
+                    'hair_transplant_turkey': [44890, 38900, 41060, 36890, 34960, 30710, 29890, 32910, 33740, 44870, 33660, 29670, 29610, 26580, 30340, null]
+                },
+                'EUROPE': {
+                    'hair_transplant_turkey': [29720, 28550, 27810, 25960, 30160, 24720, 23870, 22220, 23020, 26500, 26670, 27760, 32980, 31330, 27330, null]
+                },
+                ‘CANADA: {
+                    'hair_transplant_turkey': [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+                }
+                }
+            },
+            'backlinks': {}
+        };
+
+        /* Chart mapping */
+        const chartMap = {
+            'average-position': ['positionChart'],
+            'visibility': ['visibilityChart'],
+            'keywords': ['keywordsChart'],
+            'backlinks': [],
+            'traffic': ['clickChart', 'impressionChart'],
+            'search-term': ['searchTermChart']
+        };
+
+        /* Date labels */
+        const allLabels = ['Oca 24', 'Şub 24', 'Mar 24', 'Nis 24', 'May 24', 'Haz 24', 'Tem 24', 'Ağu 24', 'Eyl 24', 'Eki 24', 'Kas 24', 'Ara 24', 'Oca 25', 'Şub 25', 'Mar 25', 'Nis 25'];
+
+        Chart.defaults.font.family = 'Poppins, sans-serif';
+        Chart.defaults.color = '#2c3e50';
+
+        /* Navigation functions */
+        function showCategory(categoryId, evt) {
+            document.querySelectorAll('.category-section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(categoryId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            if (evt) evt.target.classList.add('active');
+
+            currentCategory = categoryId;
+            updateCountryTabs(categoryId);
+
+            const available = getAvailableCountries(categoryId);
+            if (available.length) {
+                showCountryData(categoryId, available[0]);
+            }
+        }
+
+        function getAvailableCountries(categoryId) {
+            const cat = realSeoData[categoryId];
+            return cat ? Object.keys(cat) : [];
+        }
+
+        function updateCountryTabs(categoryId) {
+            const container = document.querySelector(`#${categoryId} .country-tabs`);
+            const available = getAvailableCountries(categoryId);
+
+            if (!container) return;
+
+            const countryNames = {
+                'US': 'US', 'UK': 'UK', 'AUSTRALIA': 'Australia', 'NEW_ZEALAND': 'New Zealand',
+                'FRANCE': 'France', 'EUROPE': 'Europe', 'GLOBAL': 'Global', ‘Canada’: ‘Canada’
+            };
+
+            container.innerHTML = available.map(c =>
+                `<button class="country-tab" onclick="showCountryData('${categoryId}','${c}')">${countryNames[c] || c}</button>`
+            ).join('');
+        }
+
+        function showCountryData(categoryId, country) {
+            const tabs = document.querySelectorAll(`#${categoryId} .country-tab`);
+            const mapping = {
+                'US': 'US', 'UK': 'UK', 'Australia': 'AUSTRALIA', 'New Zealand': 'NEW_ZEALAND',
+                'France': 'FRANCE', 'Europe': 'EUROPE', 'Global': 'GLOBAL', ‘Canada’: ‘Canada’
+            };
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', mapping[tab.textContent.trim()] === country);
+            });
+
+            currentCountry = country;
+            loadCategoryData(categoryId, country);
+        }
+
+        /* Data table functions */
+        function createDataTable(tableId, labels, datasets) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+
+            let html = '<table><thead><tr><th>Metrik</th>';
+            labels.forEach(label => {
+                html += `<th>${label}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            datasets.forEach(dataset => {
+                html += '<tr>';
+                html += `<td class="metric-name">${dataset.label}</td>`;
+                dataset.data.forEach(value => {
+                    if (value === null || value === undefined) {
+                        html += '<td class="no-data">-</td>';
+                    } else {
+                        if (typeof value === 'number' && value % 1 !== 0) {
+                            html += `<td>${value.toFixed(2)}</td>`;
+                        } else {
+                            html += `<td>${value}</td>`;
+                        }
+                    }
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            table.innerHTML = html;
+        }
+
+        /* Chart creation */
+        function loadCategoryData(categoryId, country) {
+            (chartMap[categoryId] || []).forEach(id => createChart(id, categoryId, country));
+        }
+
+        function createChart(chartId, categoryId, country) {
+            const canvas = document.getElementById(chartId);
+            if (!canvas) return;
+            if (chartInstances[chartId]) chartInstances[chartId].destroy();
+
+            const data = getChartData(categoryId, country, chartId);
+            const type = categoryId === 'keywords' ? 'bar' : 'line';
+
+            chartInstances[chartId] = new Chart(canvas, {
+                type,
+                data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { family: 'Poppins', weight: '500' },
+                                color: '#2c3e50',
+                                usePointStyle: type === 'line',
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(3,47,110,.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            titleFont: { family: 'Poppins', weight: '600' },
+                            bodyFont: { family: 'Helvetica Neue' },
+                            cornerRadius: 8,
+                            padding: 12,
+                            callbacks: {
+                                label: function (context) {
+                                    if (context.parsed.y === null) {
+                                        return context.dataset.label + ': Veri yok';
+                                    }
+                                    return context.dataset.label + ': ' + context.parsed.y;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(0,0,0,.05)' },
+                            ticks: {
+                                font: { family: 'Helvetica Neue', size: 11 },
+                                color: '#7f8c8d',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            reverse: categoryId === 'average-position',
+                            grid: { color: 'rgba(0,0,0,.05)' },
+                            ticks: { font: { family: 'Helvetica Neue', size: 11 }, color: '#7f8c8d' },
+                            title: {
+                                display: true,
+                                text: getYAxisLabel(categoryId),
+                                font: { family: 'Poppins', weight: '500' },
+                                color: '#2c3e50'
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: .3,
+                            borderWidth: 3,
+                            spanGaps: false
+                        },
+                        point: {
+                            radius: type === 'line' ? 4 : 0,
+                            hoverRadius: type === 'line' ? 6 : 0,
+                            borderWidth: 2,
+                            backgroundColor: '#fff'
+                        },
+                        bar: { borderWidth: 1, borderRadius: 4 }
+                    }
+                }
+            });
+
+            // Create data table for the chart
+            if (data.datasets.length > 0) {
+                const tableId = chartId.replace('Chart', 'Table');
+                createDataTable(tableId, data.labels, data.datasets);
+            }
+        }
+
+        function getYAxisLabel(categoryId) {
+            const map = {
+                'average-position': 'Position (Lower is Better)',
+                'visibility': 'Visibility (%)',
+                'keywords': 'Keyword Count',
+                'search-term': 'Search Volume',
+                'traffic': 'Clicks / Impressions'
+            };
+            return map[categoryId] || 'Value';
+        }
+
+        function getChartData(categoryId, country, chartId) {
+            const categoryData = realSeoData[categoryId]?.[country] || {};
+
+            if (categoryId === 'average-position') {
+                const datasets = [];
+                if (categoryData.core_target) {
+                    datasets.push({
+                        label: 'Core Target',
+                        data: categoryData.core_target,
+                        borderColor: '#032f6e',
+                        backgroundColor: '#032f6e',
+                        fill: false,
+                        spanGaps: false
+                    });
+                }
+                if (categoryData.primary_target) {
+                    const primaryData = new Array(16).fill(null);
+                    const targetIndices = [12, 13, 14];
+                    categoryData.primary_target.forEach((value, index) => {
+                        if (targetIndices[index] !== undefined && value !== null) {
+                            primaryData[targetIndices[index]] = value;
+                        }
+                    });
+                    datasets.push({
+                        label: 'Primary Target (Oca-Mar 25)',
+                        data: primaryData,
+                        borderColor: '#6bb6ff',
+                        backgroundColor: '#6bb6ff',
+                        fill: false,
+                        spanGaps: false
+                    });
+                }
+                if (categoryData.hair_transplant) {
+                    datasets.push({
+                        label: 'Hair Transplant Turkey',
+                        data: categoryData.hair_transplant,
+                        borderColor: '#9dcde3',
+                        backgroundColor: '#9dcde3',
+                        fill: false,
+                        spanGaps: false
+                    });
+                }
+                if (categoryData.hair_transplant_cost) {
+                    datasets.push({
+                        label: 'Hair Transplant Turkey Cost',
+                        data: categoryData.hair_transplant_cost,
+                        borderColor: '#ff9f40',
+                        backgroundColor: '#ff9f40',
+                        fill: false,
+                        spanGaps: false
+                    });
+                }
+                return { labels: allLabels, datasets };
+            } else if (categoryId === 'visibility') {
+                const datasets = [];
+                if (categoryData.core_target) {
+                    datasets.push({
+                        label: 'Core Target',
+                        data: categoryData.core_target.map(v => v !== null ? v * 100 : null),
+                        borderColor: '#032f6e',
+                        backgroundColor: '#032f6e',
+                        fill: false,
+                        spanGaps: false
+                    });
+                }
+                if (categoryData.primary_target) {
+                    const primaryData = new Array(16).fill(null);
+                    const targetIndices = [12, 13, 14];
+                    categoryData.primary_target.forEach((value, index) => {
+                        if (targetIndices[index] !== undefined && value !== null) {
+                            primaryData[targetIndices[index]] = value * 100;
+                        }
+                    });
+                    datasets.push({
+                        label: 'Primary Target (Oca-Mar 25)',
+                        data: primaryData,
+                        borderColor: '#6bb6ff',
+                        backgroundColor: '#6bb6ff',
+                        fill: false,
+                        spanGaps: false
+                    });
+                }
+                return { labels: allLabels, datasets };
+            } else if (categoryId === 'keywords') {
+                return {
+                    labels: allLabels,
+                    datasets: [
+                        {
+                            label: 'Top 3',
+                            data: categoryData.top_3 || new Array(16).fill(null),
+                            backgroundColor: '#032f6e',
+                            borderColor: '#032f6e'
+                        },
+                        {
+                            label: 'Top 10',
+                            data: categoryData.top_10 || new Array(16).fill(null),
+                            backgroundColor: '#6bb6ff',
+                            borderColor: '#6bb6ff'
+                        },
+                        {
+                            label: 'Top 20',
+                            data: categoryData.top_20 || new Array(16).fill(null),
+                            backgroundColor: '#9dcde3',
+                            borderColor: '#9dcde3'
+                        }
+                    ]
+                };
+            } else if (categoryId === 'traffic') {
+                if (chartId === 'clickChart') {
+                    return {
+                        labels: allLabels,
+                        datasets: [{
+                            label: 'Clicks',
+                            data: categoryData.clicks || new Array(16).fill(null),
+                            borderColor: '#032f6e',
+                            backgroundColor: '#032f6e',
+                            fill: false,
+                            spanGaps: false
+                        }]
+                    };
+                } else if (chartId === 'impressionChart') {
+                    return {
+                        labels: allLabels,
+                        datasets: [{
+                            label: 'Impressions',
+                            data: categoryData.impressions || new Array(16).fill(null),
+                            borderColor: '#6bb6ff',
+                            backgroundColor: '#6bb6ff',
+                            fill: false,
+                            spanGaps: false
+                        }]
+                    };
+                }
+            } else if (categoryId === 'search-term') {
+                return {
+                    labels: allLabels,
+                    datasets: [{
+                        label: 'Hair Transplant Turkey',
+                        data: categoryData.hair_transplant_turkey || new Array(16).fill(null),
+                        borderColor: '#032f6e',
+                        backgroundColor: '#032f6e',
+                        fill: false,
+                        spanGaps: false
+                    }]
+                };
+            }
+
+            return { labels: [], datasets: [] };
+        }
+
+        /* Initialize */
+        document.addEventListener('DOMContentLoaded', () => {
+            showCategory('average-position', null);
+        });
+    </script>
+</body>
+
+</html>
